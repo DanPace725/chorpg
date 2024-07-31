@@ -1,0 +1,4 @@
+fasthtml
+fastapi
+passlib
+

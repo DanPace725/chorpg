@@ -1,5 +1,5 @@
 import sqlite3
-import os
+import bcrypt
 
 def create_connection(db_file='chores.db'):
     """Create a database connection to the SQLite database specified by db_file"""
@@ -109,5 +109,24 @@ def create_tables():
     else:
         print("Error! Cannot create the database connection.")
 
+
+
+
 if __name__ == "__main__":
     create_tables()
+
+
+def register_admin(conn, username, password):
+    hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+    try:
+        with conn:
+            conn.execute("INSERT INTO admin (username, password_hash) VALUES (?, ?)", (username, hashed_password))
+        return True
+    except sqlite3.IntegrityError:
+        return False
+
+def login_admin(conn, username, password):
+    user = conn.execute("SELECT id, password_hash FROM admin WHERE username = ?", (username,)).fetchone()
+    if user and bcrypt.checkpw(password.encode('utf-8'), user[1]):
+        return user[0]
+    return None
